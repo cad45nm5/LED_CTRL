@@ -1,0 +1,9 @@
+C:\Users\STEVEN\Desktop\GITHUB\LED_EFFECT_CTRL\Visual\uart_control\bin\Debug\uart_control.exe.config
+C:\Users\STEVEN\Desktop\GITHUB\LED_EFFECT_CTRL\Visual\uart_control\bin\Debug\uart_control.exe
+C:\Users\STEVEN\Desktop\GITHUB\LED_EFFECT_CTRL\Visual\uart_control\bin\Debug\uart_control.pdb
+C:\Users\STEVEN\Desktop\GITHUB\LED_EFFECT_CTRL\Visual\uart_control\obj\Debug\uart_control.csprojAssemblyReference.cache
+C:\Users\STEVEN\Desktop\GITHUB\LED_EFFECT_CTRL\Visual\uart_control\obj\Debug\uart_control.Form1.resources
+C:\Users\STEVEN\Desktop\GITHUB\LED_EFFECT_CTRL\Visual\uart_control\obj\Debug\uart_control.Properties.Resources.resources
+C:\Users\STEVEN\Desktop\GITHUB\LED_EFFECT_CTRL\Visual\uart_control\obj\Debug\uart_control.csproj.GenerateResource.cache
+C:\Users\STEVEN\Desktop\GITHUB\LED_EFFECT_CTRL\Visual\uart_control\obj\Debug\uart_control.exe
+C:\Users\STEVEN\Desktop\GITHUB\LED_EFFECT_CTRL\Visual\uart_control\obj\Debug\uart_control.pdb
