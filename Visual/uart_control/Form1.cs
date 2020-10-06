@@ -10,13 +10,16 @@ using System.Windows.Forms;
 using System.IO.Ports;
 using System.Threading;
 using System.Windows.Input;
+using System.IO;
+
 namespace uart_control
 {
     public partial class Form1 : Form
     {
+        int R, G, B;
 
-
-
+        string com = "COM12";
+        Boolean draw = false;
         public Form1()
         {
             InitializeComponent();
@@ -72,31 +75,75 @@ namespace uart_control
             for (int i = 0; i < Buttons.Length; i++)
             {
                 int index = i;
-                //Buttons[i].Click += (sender1, ex) => this.Display(index + 1);
+                Buttons[i].Click += (sender1, ex) => this.Display2(index + 1);
                 Buttons[i].MouseEnter += (sender1, ex) => this.Display(index + 1);
                 this.Controls.Add(Buttons[i]);
             }
         }
         public void Display(int i)
         {
+            serialPort1.DiscardInBuffer();
+            if (draw)
+            {
+                i--;
+                Buttons[i].BackColor = pictureBox1.BackColor;
+                Buttons[i].FlatAppearance.BorderColor = pictureBox1.BackColor;
+                string r, g, b;
+                r = pictureBox1.BackColor.R.ToString("D3");
+                g = pictureBox1.BackColor.G.ToString("D3");
+                b = pictureBox1.BackColor.B.ToString("D3");
+                if (serialPort1.IsOpen) serialPort1.Write("led:" + i.ToString("D3") + r + g + b + "\r\n");
+            }
+
+
+
+        }
+
+        public void Display2(int i)
+        {
+            serialPort1.DiscardInBuffer();
             i--;
             Buttons[i].BackColor = pictureBox1.BackColor;
             Buttons[i].FlatAppearance.BorderColor = pictureBox1.BackColor;
             string r, g, b;
-            r = hScrollBar3.Value.ToString("D3");
-            g = hScrollBar2.Value.ToString("D3");
-            b = hScrollBar1.Value.ToString("D3");
+            r = pictureBox1.BackColor.R.ToString("D3");
+            g = pictureBox1.BackColor.G.ToString("D3");
+            b = pictureBox1.BackColor.B.ToString("D3");
             //MessageBox.Show("Button number is " + i);
-            serialPort1.Write("led:" + i.ToString("D3") + r + g + b + "\r\n");
-            Thread.Sleep(10);
+            if (serialPort1.IsOpen) serialPort1.Write("led:" + i.ToString("D3") + r + g + b + "\r\n");
+            // Thread.Sleep(10);
 
         }
 
         private void serialPort1_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            Thread.Sleep(50);
-            string data = serialPort1.ReadLine();
-            richTextBox1.AppendText(data);
+            try
+            {
+
+                string data = serialPort1.ReadLine();
+                if (data.Substring(0, 4) == "led:")
+                {
+                    int led = int.Parse(data.Substring(4, 3));
+                    int G = int.Parse(data.Substring(7, 3));
+                    int R = int.Parse(data.Substring(10, 3));
+                    int B = int.Parse(data.Substring(13, 3));
+                    R = R * 3;
+                    G = G * 3;
+                    B = B * 3;
+
+                    if (R >= 255) R = 255;
+                    if (G >= 255) G = 255;
+                    if (B >= 255) B = 255;
+                    Buttons[led].BackColor = Color.FromArgb(R, G, B);
+                    
+                }
+                richTextBox1.AppendText(data);
+            }
+            catch
+            {
+
+            }
+
         }
 
         private void richTextBox1_TextChanged(object sender, EventArgs e)
@@ -107,6 +154,7 @@ namespace uart_control
         private void button1_Click(object sender, EventArgs e)
         {
 
+            serialPort1.DiscardInBuffer();
             for (int i = 0; i < Buttons.Length; i++)
             {
                 Buttons[i].BackColor = Form1.DefaultBackColor;
@@ -121,48 +169,138 @@ namespace uart_control
 
         }
 
-        private void hScrollBar3_Scroll(object sender, ScrollEventArgs e)
-        {
-            Color C = Color.FromArgb(hScrollBar3.Value, hScrollBar2.Value, hScrollBar1.Value);
-            pictureBox1.BackColor = C;
-        }
 
-        private void hScrollBar2_Scroll(object sender, ScrollEventArgs e)
-        {
-            Color C = Color.FromArgb(hScrollBar3.Value, hScrollBar2.Value, hScrollBar1.Value);
-            pictureBox1.BackColor = C;
-        }
 
-        private void hScrollBar1_Scroll(object sender, ScrollEventArgs e)
-        {
 
-            Color C = Color.FromArgb(hScrollBar3.Value, hScrollBar2.Value, hScrollBar1.Value);
-            pictureBox1.BackColor = C;
-        }
 
         private void button3_Click(object sender, EventArgs e)
         {
+            serialPort1.DiscardInBuffer();
             serialPort1.Write("mode:1\r\n"); Thread.Sleep(10);
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
+            serialPort1.DiscardInBuffer();
             serialPort1.Write("mode:0\r\n"); Thread.Sleep(10);
         }
 
         private void vScrollBar1_Scroll(object sender, ScrollEventArgs e)
         {
-            serialPort1.Write("brightness:"+(255-vScrollBar1.Value).ToString("D3")+"\r\n"); Thread.Sleep(10);
+            serialPort1.DiscardInBuffer();
+            serialPort1.Write("brightness:" + (255 - vScrollBar1.Value).ToString("D3") + "\r\n"); Thread.Sleep(10);
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
+            serialPort1.DiscardInBuffer();
             serialPort1.Write("mode:2\r\n"); Thread.Sleep(10);
         }
 
         private void hScrollBar4_Scroll(object sender, ScrollEventArgs e)
         {
-            serialPort1.Write("speed:" +hScrollBar4.Value.ToString("D3") + "\r\n"); Thread.Sleep(10);
+            serialPort1.DiscardInBuffer();
+            serialPort1.Write("speed:" + hScrollBar4.Value.ToString("D3") + "\r\n"); Thread.Sleep(10);
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            serialPort1.Close();
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            if (serialPort1.IsOpen) serialPort1.DiscardInBuffer();
+            String[] COMPorts = SerialPort.GetPortNames();
+            comboBox1.Items.Clear();
+
+            //將找到之現有COM加入Combo,Text中.
+            foreach (string port in COMPorts) { comboBox1.Items.Add(port); }
+        }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+            if (colorDialog1.ShowDialog() != DialogResult.Cancel)
+            {
+                pictureBox1.BackColor = colorDialog1.Color;  // 回傳選擇顏色，並且設定 Textbox 的背景顏色
+            }
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            com = comboBox1.Text;
+            serialPort1.PortName = com;
+            serialPort1.Open();
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            draw = checkBox1.Checked;
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            if (!System.IO.File.Exists("bitmap.txt"))
+            {
+                FileStream fs1 = new FileStream("bitmap.txt", FileMode.Create, FileAccess.Write);
+                fs1.Close();
+            }
+
+            StreamWriter sw = new StreamWriter("bitmap.txt");
+
+            for (int i = 0; i < 213; i++)
+            {
+              sw.WriteLine(Buttons[i].BackColor.R.ToString("D3"));
+              sw.WriteLine(Buttons[i].BackColor.G.ToString("D3"));
+              sw.WriteLine(Buttons[i].BackColor.B.ToString("D3"));
+            }
+            
+           
+            sw.Close();
+
+        }
+
+        private void button8_Click(object sender, EventArgs e)
+        {
+            
+           
+            try
+            {
+                //Pass the file path and file name to the StreamReader constructor
+                StreamReader sr = new StreamReader("bitmap.txt");
+                //Read the first line of text
+           
+              
+
+                for(int i = 0; i < 213; i++)
+                {
+                    R = int.Parse(sr.ReadLine());
+                    G = int.Parse(sr.ReadLine());
+                    B = int.Parse(sr.ReadLine());
+                   
+                    //Thread.Sleep(10);
+                    Buttons[i].BackColor = Color.FromArgb(R,G,B);
+                }
+                //close the file
+                sr.Close();
+                
+            }
+            catch 
+            {
+               
+            }
+
+            for (int i = 0; i < 213; i++)
+            {
+                if (serialPort1.IsOpen) serialPort1.Write("led:" + i.ToString("D3") + Buttons[i].BackColor.R.ToString("D3") + Buttons[i].BackColor.G.ToString("D3") + Buttons[i].BackColor.B.ToString("D3") + "\r\n");
+                Thread.Sleep(35);
+            }
+        }
+
+        private void timer2_Tick(object sender, EventArgs e)
+        {
+          
+            
         }
     }
 }

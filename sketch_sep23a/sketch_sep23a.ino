@@ -16,7 +16,7 @@ int mode=0;
 int bright=0;
 int speed=0;
 int wave=155,waves=1;
-uart u1(921600);
+uart u1(2000000);
 
 
 
@@ -119,10 +119,10 @@ void loop(){
       DISPLAY_SPEED=speed; 
       
      }
-    
+    String led,r,g,b;
     if(mode==5)
     {//led:000123000123
-        String led,r,g,b;
+        
         if(str.startsWith("led:"))
         {
           led=str.substring(4,7).toInt();
@@ -150,7 +150,25 @@ void loop(){
    
       
      }
+      for(int i=0;i<NUM_LEDS;i++)
+      {
+        led=String(i);
+     
+        r=String(leds[i].r);
+        g=String(leds[i].g);
+        b=String(leds[i].b);
+        if(led.length()<2)led="00"+led;
+        else if(led.length()<3)led="0"+led;
+        if(r.length()<2)r="00"+r;
+        else if(r.length()<3)r="0"+r;
+        if(g.length()<2)g="00"+g;
+        else if(g.length()<3)g="0"+g;
+        if(b.length()<2)b="00"+b;
+        else if(b.length()<3)b="0"+b;
       
+        u1.prtln("led:"+led+r+g+b);
+        
+      }
       FastLED.show(); 
       delay(100/DISPLAY_SPEED);
  
